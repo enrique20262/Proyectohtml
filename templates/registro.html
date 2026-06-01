@@ -1,0 +1,41 @@
+{% extends 'layout.html' %}
+
+{% block titulo %}Registro - SafeCampus UCB{% endblock %}
+
+{% block contenido %}
+<div class="login-bg">
+    <div class="login-box">
+        <div class="logo-grande">
+            <h1><span class="ucb">UCB</span> SafeCampus</h1>
+        </div>
+        <p class="subtitulo">Crea tu cuenta institucional</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for categoria, mensaje in messages %}
+                <div class="alert alert-{{ categoria }}">{{ mensaje }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        <form method="POST">
+            <div class="form-group">
+                <label>Nombre completo</label>
+                <input type="text" name="nombre" required minlength="2">
+            </div>
+            <div class="form-group">
+                <label>Correo @ucb.edu.bo</label>
+                <input type="email" name="correo" placeholder="tunombre@ucb.edu.bo"
+                       pattern=".+@ucb\.edu\.bo$" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" minlength="4" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Registrarme</button>
+        </form>
+
+        <div class="login-links">
+            <p>Ya tienes cuenta? <a href="{{ url_for('login') }}">Inicia sesion</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

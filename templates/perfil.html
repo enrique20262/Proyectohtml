@@ -1,0 +1,88 @@
+{% extends 'layout.html' %}
+
+{% block titulo %}Mi Perfil - SafeCampus UCB{% endblock %}
+
+{% block contenido %}
+<div class="container">
+    <div class="grid grid-2">
+        <!-- Edicion de perfil (US 05) -->
+        <div class="card">
+            <h1>Mi Perfil</h1>
+            <p class="text-muted">US 05 - Edicion de perfil</p>
+
+            <form method="POST" class="mt-2">
+                <div class="form-group">
+                    <label>Correo institucional</label>
+                    <input type="email" value="{{ usuario.correo }}" disabled style="background:#f8f9fb;">
+                    <small class="text-muted">El correo no se puede modificar</small>
+                </div>
+                <div class="form-group">
+                    <label>Nombre completo</label>
+                    <input type="text" name="nombre" value="{{ usuario.nombre }}" required minlength="2">
+                </div>
+                <div class="form-group">
+                    <label>Telefono de contacto</label>
+                    <input type="text" name="telefono" value="{{ usuario.telefono or '' }}"
+                           pattern="\+?[0-9]{7,15}" placeholder="70123456">
+                    <small class="text-muted">Solo digitos, opcional + al inicio. 7-15 caracteres.</small>
+                </div>
+                <button type="submit" class="btn btn-primary">Guardar cambios</button>
+            </form>
+        </div>
+
+        <!-- Contactos de emergencia (US 16) -->
+        <div class="card">
+            <h1>Contactos de Emergencia</h1>
+            <p class="text-muted">US 16 - Maximo 2 contactos</p>
+
+            {% if contactos %}
+                <table class="tabla mt-2">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Telefono</th>
+                            <th>Correo</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for c in contactos %}
+                        <tr>
+                            <td>{{ c.nombre }}</td>
+                            <td>{{ c.telefono or '-' }}</td>
+                            <td>{{ c.correo or '-' }}</td>
+                            <td>
+                                <a href="{{ url_for('contactos_eliminar', contacto_id=c.id) }}"
+                                   class="btn btn-danger btn-sm"
+                                   onclick="return confirm('Eliminar contacto?')">X</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="text-muted mt-2">Aun no tienes contactos registrados.</p>
+            {% endif %}
+
+            {% if contactos|length < 2 %}
+            <h2 style="margin-top: 2rem; font-size: 1.1rem;">Agregar nuevo contacto</h2>
+            <form method="POST" action="{{ url_for('contactos_agregar') }}" class="mt-2">
+                <div class="form-group">
+                    <label>Nombre</label>
+                    <input type="text" name="nombre" required>
+                </div>
+                <div class="form-group">
+                    <label>Telefono</label>
+                    <input type="text" name="telefono" pattern="\+?[0-9]{7,15}">
+                </div>
+                <div class="form-group">
+                    <label>Correo (opcional)</label>
+                    <input type="email" name="correo">
+                </div>
+                <button type="submit" class="btn btn-success btn-sm">Agregar contacto</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

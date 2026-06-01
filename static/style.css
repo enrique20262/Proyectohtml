@@ -1,0 +1,408 @@
+/* SafeCampus UCB - Estilos */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f4f6fa;
+    color: #1a2332;
+    min-height: 100vh;
+    line-height: 1.5;
+}
+
+/* Header / Navbar */
+.navbar {
+    background: linear-gradient(135deg, #003366 0%, #0066cc 100%);
+    color: white;
+    padding: 1rem 2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar .brand {
+    font-size: 1.4rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.navbar .brand .logo {
+    background: #ffcc00;
+    color: #003366;
+    padding: 0.3rem 0.6rem;
+    border-radius: 6px;
+    font-weight: 900;
+}
+
+.navbar nav {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+}
+
+.navbar nav a {
+    color: white;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.navbar nav a:hover {
+    background: rgba(255,255,255,0.15);
+}
+
+.user-info {
+    background: rgba(255,255,255,0.1);
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+/* Container */
+.container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1.5rem;
+}
+
+.container-narrow {
+    max-width: 500px;
+    margin: 4rem auto;
+    padding: 0 1.5rem;
+}
+
+/* Cards */
+.card {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    margin-bottom: 1.5rem;
+}
+
+.card h1, .card h2 {
+    color: #003366;
+    margin-bottom: 1rem;
+}
+
+.card h1 {
+    font-size: 1.8rem;
+    border-bottom: 3px solid #ffcc00;
+    padding-bottom: 0.5rem;
+    display: inline-block;
+}
+
+/* Forms */
+.form-group {
+    margin-bottom: 1.2rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.4rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    border: 2px solid #e0e6ed;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #0066cc;
+}
+
+/* Botones */
+.btn {
+    display: inline-block;
+    padding: 0.7rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: #0066cc;
+    color: white;
+}
+.btn-primary:hover { background: #004999; }
+
+.btn-success {
+    background: #28a745;
+    color: white;
+}
+.btn-success:hover { background: #1e7e34; }
+
+.btn-warning {
+    background: #ffc107;
+    color: #333;
+}
+.btn-warning:hover { background: #e0a800; }
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+}
+.btn-danger:hover { background: #b02a37; }
+
+.btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+}
+
+.btn-block {
+    width: 100%;
+    display: block;
+}
+
+/* BOTON DE PANICO */
+.btn-panico {
+    background: linear-gradient(135deg, #dc3545 0%, #ad1f2e 100%);
+    color: white;
+    font-size: 1.5rem;
+    font-weight: 900;
+    padding: 1.5rem 2rem;
+    border: none;
+    border-radius: 50%;
+    width: 200px;
+    height: 200px;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(220,53,69,0.4);
+    transition: transform 0.1s, box-shadow 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.btn-panico:hover {
+    transform: scale(1.05);
+    box-shadow: 0 12px 32px rgba(220,53,69,0.5);
+}
+
+.btn-panico:active {
+    transform: scale(0.95);
+}
+
+.panico-container {
+    text-align: center;
+    padding: 2rem;
+}
+
+/* Alertas / Flash messages */
+.alert {
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    border-left: 4px solid;
+}
+
+.alert-success {
+    background: #d4edda;
+    color: #155724;
+    border-color: #28a745;
+}
+.alert-danger {
+    background: #f8d7da;
+    color: #721c24;
+    border-color: #dc3545;
+}
+.alert-warning {
+    background: #fff3cd;
+    color: #856404;
+    border-color: #ffc107;
+}
+.alert-info {
+    background: #d1ecf1;
+    color: #0c5460;
+    border-color: #17a2b8;
+}
+
+/* Tablas */
+.tabla {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.tabla th {
+    background: #003366;
+    color: white;
+    padding: 0.8rem 1rem;
+    text-align: left;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tabla td {
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid #e0e6ed;
+}
+
+.tabla tr:hover {
+    background: #f8f9fb;
+}
+
+.tabla .badge {
+    display: inline-block;
+    padding: 0.25rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.badge-activa { background: #dc3545; color: white; animation: parpadeo 1s infinite; }
+.badge-atendida { background: #28a745; color: white; }
+.badge-falsa { background: #6c757d; color: white; }
+
+@keyframes parpadeo {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+/* Mapa */
+#mapa {
+    height: 500px;
+    width: 100%;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+/* Grid */
+.grid {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.grid-2 { grid-template-columns: 1fr 1fr; }
+.grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+.grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+@media (max-width: 768px) {
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+}
+
+/* Stats */
+.stat-box {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border-top: 4px solid #0066cc;
+}
+
+.stat-box.danger { border-top-color: #dc3545; }
+.stat-box.success { border-top-color: #28a745; }
+.stat-box.warning { border-top-color: #ffc107; }
+
+.stat-box .numero {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #003366;
+}
+
+.stat-box .label {
+    color: #666;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 0.3rem;
+}
+
+/* Login pages */
+.login-bg {
+    background: linear-gradient(135deg, #003366 0%, #0066cc 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.login-box {
+    background: white;
+    border-radius: 16px;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+
+.login-box .logo-grande {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.login-box .logo-grande h1 {
+    color: #003366;
+    font-size: 2rem;
+    margin: 0;
+}
+
+.login-box .logo-grande .ucb {
+    background: #ffcc00;
+    color: #003366;
+    padding: 0.3rem 0.8rem;
+    border-radius: 8px;
+    font-weight: 900;
+}
+
+.login-box .subtitulo {
+    text-align: center;
+    color: #666;
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
+}
+
+.login-links {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+}
+
+.login-links a {
+    color: #0066cc;
+    text-decoration: none;
+}
+
+/* Misc */
+.text-muted { color: #6c757d; font-size: 0.9rem; }
+.text-center { text-align: center; }
+.mt-2 { margin-top: 1rem; }
+.mb-2 { margin-bottom: 1rem; }
+.codigo-demo {
+    background: #fff3cd;
+    border: 2px dashed #ffc107;
+    padding: 1rem;
+    border-radius: 8px;
+    text-align: center;
+    margin: 1rem 0;
+}
+.codigo-demo .codigo {
+    font-size: 2rem;
+    font-weight: bold;
+    letter-spacing: 8px;
+    color: #003366;
+    font-family: 'Courier New', monospace;
+}

@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.DS_Store
+.vscode/
+ngrok.exe
+static/qr_code.png
+static/qr_code_ngrok.png
+*.log
+*.sql.session

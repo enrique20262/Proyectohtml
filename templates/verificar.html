@@ -1,0 +1,45 @@
+{% extends 'layout.html' %}
+
+{% block titulo %}Verificar cuenta - SafeCampus UCB{% endblock %}
+
+{% block contenido %}
+<div class="login-bg">
+    <div class="login-box">
+        <div class="logo-grande">
+            <h1><span class="ucb">UCB</span> SafeCampus</h1>
+        </div>
+        <p class="subtitulo">Activacion de cuenta (US 04)</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for categoria, mensaje in messages %}
+                <div class="alert alert-{{ categoria }}">{{ mensaje }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        {% if codigo_demo %}
+        <div class="codigo-demo">
+            <p>Tu codigo de verificacion:</p>
+            <div class="codigo">{{ codigo_demo }}</div>
+            <p class="text-muted">En produccion este codigo se envia por correo institucional</p>
+        </div>
+        {% endif %}
+
+        <form method="POST">
+            <div class="form-group">
+                <label>Correo</label>
+                <input type="email" name="correo" value="{{ correo }}" required>
+            </div>
+            <div class="form-group">
+                <label>Codigo de verificacion (6 digitos)</label>
+                <input type="text" name="codigo" maxlength="6" pattern="[0-9]{6}"
+                       placeholder="123456" required style="letter-spacing: 8px; text-align: center; font-size: 1.3rem;">
+            </div>
+            <button type="submit" class="btn btn-success btn-block">Verificar cuenta</button>
+        </form>
+
+        <div class="login-links">
+            <p><a href="{{ url_for('login') }}">Volver al login</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends 'layout.html' %}
+
+{% block titulo %}Login - SafeCampus UCB{% endblock %}
+
+{% block contenido %}
+<div class="login-bg">
+    <div class="login-box">
+        <div class="logo-grande">
+            <h1><span class="ucb">UCB</span> SafeCampus</h1>
+        </div>
+        <p class="subtitulo">Sistema de seguridad estudiantil<br>Equipo SCHEIBE</p>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for categoria, mensaje in messages %}
+                <div class="alert alert-{{ categoria }}">{{ mensaje }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        <form method="POST">
+            <div class="form-group">
+                <label>Correo institucional</label>
+                <input type="email" name="correo" placeholder="tunombre@ucb.edu.bo" required>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" placeholder="Tu password" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Iniciar sesion</button>
+        </form>
+
+        <div class="login-links">
+            <p>No tienes cuenta? <a href="{{ url_for('registro') }}">Registrate aqui</a></p>
+            <p class="mt-2"><a href="{{ url_for('verificar') }}">Verificar mi cuenta</a></p>
+        </div>
+
+        <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid #eee;">
+        <p class="text-muted text-center" style="font-size: 0.8rem;">
+            <strong>Demo:</strong> kevin.panoso@ucb.edu.bo / ucb1234<br>
+            <strong>Monitor:</strong> monitor.seguridad@ucb.edu.bo / ucb1234
+        </p>
+    </div>
+</div>
+{% endblock %}

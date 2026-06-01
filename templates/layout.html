@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block titulo %}SafeCampus UCB{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    {% block head_extra %}{% endblock %}
+</head>
+<body>
+
+{% if session.usuario_id %}
+<header class="navbar">
+    <div class="brand">
+        <span class="logo">UCB</span>
+        <span>SafeCampus</span>
+    </div>
+    <nav>
+        {% if session.rol in ['estudiante'] %}
+            <a href="{{ url_for('mapa') }}">Mapa</a>
+            <a href="{{ url_for('perfil') }}">Mi perfil</a>
+        {% endif %}
+        {% if session.rol in ['monitor', 'admin'] %}
+            <a href="{{ url_for('panel_monitoreo') }}">Panel SOS</a>
+            <a href="{{ url_for('historial') }}">Historial</a>
+            <a href="{{ url_for('usuarios') }}">Usuarios</a>
+            <a href="{{ url_for('reportes_view') }}">Reportes</a>
+        {% endif %}
+        <span class="user-info">{{ session.nombre }} ({{ session.rol }})</span>
+        <a href="{{ url_for('logout') }}">Cerrar sesion</a>
+    </nav>
+</header>
+{% endif %}
+
+<main>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="container">
+            {% for categoria, mensaje in messages %}
+                <div class="alert alert-{{ categoria }}">{{ mensaje }}</div>
+            {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    {% block contenido %}{% endblock %}
+</main>
+
+{% block scripts %}{% endblock %}
+</body>
+</html>

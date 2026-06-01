@@ -1,0 +1,394 @@
+{% extends 'layout.html' %}
+
+{% block titulo %}Dashboard de Alertas - SafeCampus UCB{% endblock %}
+
+{% block head_extra %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+.dashboard-container {
+    padding: 1.5rem 0;
+}
+.dashboard-title {
+    color: #003366;
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.3rem;
+}
+.dashboard-subtitle {
+    color: #6c757d;
+    margin-bottom: 1.5rem;
+}
+
+/* Filtros */
+.filtros-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    margin-bottom: 1.5rem;
+}
+.filtros-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 2fr auto;
+    gap: 1rem;
+    align-items: end;
+}
+.filtros-grid label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.4rem;
+}
+.filtros-grid input,
+.filtros-grid select {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    border: 2px solid #e0e6ed;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    background: white;
+}
+.filtros-grid input[type="date"] {
+    color: #333;
+}
+
+/* Stats cards */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.3rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.stat-card .label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+}
+.stat-card .valor {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: #1a2332;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+.stat-card .variacion {
+    font-size: 0.85rem;
+    color: #28a745;
+}
+.stat-card .variacion.down { color: #28a745; }
+.stat-card .variacion.up { color: #dc3545; }
+.stat-card .variacion.neutral { color: #ffc107; }
+
+/* Charts */
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+.chart-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.chart-card h3 {
+    color: #1a2332;
+    font-size: 1.05rem;
+    margin-bottom: 1rem;
+}
+
+/* Tabla de alertas */
+.tabla-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.tabla-card h3 {
+    color: #1a2332;
+    font-size: 1.05rem;
+    margin-bottom: 1rem;
+}
+.tabla-alertas {
+    width: 100%;
+    border-collapse: collapse;
+}
+.tabla-alertas thead th {
+    text-align: left;
+    padding: 0.7rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #e0e6ed;
+}
+.tabla-alertas tbody td {
+    padding: 0.8rem 0.5rem;
+    border-bottom: 1px solid #f0f2f5;
+    font-size: 0.9rem;
+}
+.tabla-alertas tbody tr:hover {
+    background: #f8f9fb;
+}
+.estado-badge {
+    display: inline-block;
+    padding: 0.25rem 0.7rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+.estado-atendida { background: #d4edda; color: #155724; }
+.estado-falsa { background: #f8d7da; color: #721c24; }
+.estado-activa { background: #fff3cd; color: #856404; }
+
+.btn-filtrar {
+    background: #0066cc;
+    color: white;
+    border: none;
+    padding: 0.7rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    height: 44px;
+}
+.btn-limpiar {
+    background: white;
+    color: #1a2332;
+    border: 2px solid #e0e6ed;
+    padding: 0.7rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    height: 44px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+}
+
+@media (max-width: 900px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .charts-grid { grid-template-columns: 1fr; }
+    .filtros-grid { grid-template-columns: 1fr; }
+}
+</style>
+{% endblock %}
+
+{% block contenido %}
+<div class="container">
+    <div class="dashboard-container">
+        <h1 class="dashboard-title">Dashboard de Alertas</h1>
+        <p class="dashboard-subtitle">Analisis de seguridad del campus universitario</p>
+
+        <!-- FILTROS -->
+        <form method="GET" action="{{ url_for('reportes_view') }}" class="filtros-card">
+            <div class="filtros-grid">
+                <div>
+                    <label>DESDE</label>
+                    <input type="date" name="desde" value="{{ filtros.desde }}">
+                </div>
+                <div>
+                    <label>HASTA</label>
+                    <input type="date" name="hasta" value="{{ filtros.hasta }}">
+                </div>
+                <div>
+                    <label>ESTADO</label>
+                    <select name="estado">
+                        <option value="todas" {% if filtros.estado=='todas' %}selected{% endif %}>Todas</option>
+                        <option value="activa" {% if filtros.estado=='activa' %}selected{% endif %}>Activa</option>
+                        <option value="atendida" {% if filtros.estado=='atendida' %}selected{% endif %}>Atendida</option>
+                        <option value="falsa_alarma" {% if filtros.estado=='falsa_alarma' %}selected{% endif %}>Falsa alarma</option>
+                    </select>
+                </div>
+                <div>
+                    <label>BUSQUEDA</label>
+                    <input type="text" name="busqueda" placeholder="Nombre o ID estudiante" value="{{ filtros.busqueda }}">
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button type="submit" class="btn-filtrar">Filtrar</button>
+                    <a href="{{ url_for('reportes_view') }}" class="btn-limpiar">Limpiar</a>
+                </div>
+            </div>
+        </form>
+
+        <!-- STATS CARDS -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="label">TOTAL DE ALERTAS</div>
+                <div class="valor">{{ stats.total_alertas }}</div>
+                <div class="variacion up">&#8593; 12% vs mes anterior</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">TASA FALSAS ALARMAS</div>
+                <div class="valor">{{ stats.tasa_falsas }}%</div>
+                <div class="variacion down">&#8595; 1.2% vs mes anterior</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">TIEMPO PROMEDIO RESPUESTA</div>
+                <div class="valor">{{ stats.tiempo_promedio }} <span style="font-size:1.2rem;">min</span></div>
+                <div class="variacion neutral">&#8594; Sin cambio vs mes anterior</div>
+            </div>
+            <div class="stat-card">
+                <div class="label">ALERTAS ATENDIDAS</div>
+                <div class="valor">{{ stats.atendidas }}</div>
+                <div class="variacion">({{ stats.tasa_atendidas }}% de total)</div>
+            </div>
+        </div>
+
+        <!-- CHARTS -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3>Alertas por Zona del Campus</h3>
+                <canvas id="chartZonas" height="220"></canvas>
+            </div>
+            <div class="chart-card">
+                <h3>Alertas por Hora del Dia</h3>
+                <canvas id="chartHoras" height="220"></canvas>
+            </div>
+        </div>
+
+        <!-- TABLA -->
+        <div class="tabla-card">
+            <h3>Ultimas Alertas {% if filtros.busqueda or filtros.desde or filtros.hasta or filtros.estado != 'todas' %}(filtradas){% endif %}</h3>
+            {% if alertas %}
+            <table class="tabla-alertas">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>FECHA/HORA</th>
+                        <th>ESTUDIANTE</th>
+                        <th>ZONA</th>
+                        <th>ESTADO</th>
+                        <th>TIEMPO RESPUESTA</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for a in alertas %}
+                    <tr>
+                        <td><strong>{{ a.id_formateado }}</strong></td>
+                        <td>{{ a.fecha_emision.strftime('%d/%m %H:%M') if a.fecha_emision else '-' }}</td>
+                        <td>{{ a.est_formateado }}</td>
+                        <td>{{ a.zona }}</td>
+                        <td>
+                            {% if a.estado == 'atendida' %}
+                                <span class="estado-badge estado-atendida">Atendida</span>
+                            {% elif a.estado == 'falsa_alarma' %}
+                                <span class="estado-badge estado-falsa">Falsa alarma</span>
+                            {% else %}
+                                <span class="estado-badge estado-activa">Activa</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ a.tiempo_respuesta }} min</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+            <div style="margin-top: 1rem; text-align: right;">
+                <a href="{{ url_for('exportar_csv') }}" class="btn-filtrar" style="display:inline-block; text-decoration:none;">
+                    Exportar CSV
+                </a>
+            </div>
+            {% else %}
+                <p style="text-align: center; color: #6c757d; padding: 2rem;">
+                    No hay alertas que coincidan con los filtros aplicados.
+                </p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+// Datos pasados desde Flask
+const zonasData = {{ zonas | tojson }};
+const horasData = {{ horas | tojson }};
+
+// CHART 1: Alertas por Zona (barras de colores)
+const ctxZ = document.getElementById('chartZonas').getContext('2d');
+new Chart(ctxZ, {
+    type: 'bar',
+    data: {
+        labels: Object.keys(zonasData),
+        datasets: [{
+            data: Object.values(zonasData),
+            backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'],
+            borderRadius: 8,
+            barThickness: 50
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    label: function(ctx) { return ctx.parsed.y + ' alertas'; }
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: { precision: 0 }
+            }
+        }
+    }
+});
+
+// CHART 2: Alertas por Hora (linea)
+const ctxH = document.getElementById('chartHoras').getContext('2d');
+const horaLabels = [];
+for (let i = 0; i < 24; i += 4) {
+    horaLabels.push(String(i).padStart(2, '0') + ':00');
+}
+
+// Reducir 24 valores a 6 (cada 4 horas) para que se vea mejor
+const horasReducidas = [];
+for (let i = 0; i < 24; i += 4) {
+    let suma = 0;
+    for (let j = 0; j < 4 && i+j < 24; j++) {
+        suma += horasData[i+j];
+    }
+    horasReducidas.push(suma);
+}
+
+new Chart(ctxH, {
+    type: 'line',
+    data: {
+        labels: horaLabels,
+        datasets: [{
+            data: horasReducidas,
+            borderColor: '#0066cc',
+            backgroundColor: 'rgba(0, 102, 204, 0.1)',
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#0066cc',
+            pointRadius: 4
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: { precision: 0 }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

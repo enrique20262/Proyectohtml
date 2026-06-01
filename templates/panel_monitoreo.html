@@ -1,0 +1,335 @@
+{% extends 'layout.html' %}
+
+{% block titulo %}Panel de Monitoreo - SafeCampus UCB{% endblock %}
+
+{% block head_extra %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+/* Modales de confirmación */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn {
+    from { opacity: 0; } to { opacity: 1; }
+}
+.modal-box {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    max-width: 360px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+    animation: slideUp 0.2s ease;
+}
+@keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+}
+.modal-icono {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.8rem;
+    font-weight: 900;
+    margin: 0 auto 1.2rem;
+}
+.modal-icono.success {
+    background: #28a745;
+    box-shadow: 0 0 0 8px rgba(40,167,69,0.15);
+}
+.modal-icono.warning {
+    background: #ffc107;
+    box-shadow: 0 0 0 8px rgba(255,193,7,0.15);
+    color: #856404;
+}
+.modal-titulo {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #1a2332;
+    margin-bottom: 0.5rem;
+}
+.modal-desc {
+    color: #6c757d;
+    font-size: 0.92rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+.modal-acciones {
+    display: flex;
+    gap: 0.75rem;
+}
+.modal-btn-cancelar {
+    flex: 1;
+    padding: 0.75rem;
+    border: 2px solid #e0e6ed;
+    border-radius: 10px;
+    background: white;
+    color: #6c757d;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.modal-btn-cancelar:hover { background: #f8f9fa; border-color: #adb5bd; }
+.modal-btn-confirmar-success {
+    flex: 1;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 10px;
+    background: #28a745;
+    color: white;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.modal-btn-confirmar-success:hover { background: #218838; transform: scale(1.02); }
+.modal-btn-confirmar-warning {
+    flex: 1;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 10px;
+    background: #ffc107;
+    color: #856404;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.modal-btn-confirmar-warning:hover { background: #e0a800; transform: scale(1.02); }
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+}
+</style>
+{% endblock %}
+
+{% block contenido %}
+<div class="container">
+    <div class="card">
+        <h1>Panel de Monitoreo SOS</h1>
+        <p class="text-muted">US 13 - Alertas activas en tiempo real</p>
+
+        <!-- Stats rapidos -->
+        <div class="grid grid-3 mt-2">
+            <div class="stat-box danger">
+                <div class="numero" id="contadorActivas">{{ alertas|length }}</div>
+                <div class="label">Alertas activas</div>
+            </div>
+            <div class="stat-box success">
+                <div class="numero">
+                    {% set atendidas = conteos | selectattr('estado', 'equalto', 'atendida') | list %}
+                    {{ atendidas[0].total if atendidas else 0 }}
+                </div>
+                <div class="label">Atendidas</div>
+            </div>
+            <div class="stat-box warning">
+                <div class="numero">
+                    {% set falsas = conteos | selectattr('estado', 'equalto', 'falsa_alarma') | list %}
+                    {{ falsas[0].total if falsas else 0 }}
+                </div>
+                <div class="label">Falsas alarmas</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mapa + Lista -->
+    <div class="grid grid-2">
+        <div class="card">
+            <h2>Mapa de alertas activas</h2>
+            <div id="mapaMonitoreo" style="height: 400px; border-radius: 8px;"></div>
+        </div>
+
+        <div class="card">
+            <h2>Alertas pendientes</h2>
+            {% if alertas %}
+                <table class="tabla">
+                    <thead>
+                        <tr>
+                            <th>Estudiante</th>
+                            <th>Ubicacion</th>
+                            <th>Hace</th>
+                            <th>Accion</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for a in alertas %}
+                        <tr>
+                            <td>
+                                <strong>{{ a.nombre_estudiante }}</strong><br>
+                                <small class="text-muted">{{ a.correo_estudiante }}</small><br>
+                                {% if a.telefono_estudiante %}
+                                    <small>Tel: {{ a.telefono_estudiante }}</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <small>{{ "%.5f"|format(a.latitud|float) }},<br>{{ "%.5f"|format(a.longitud|float) }}</small>
+                            </td>
+                            <td>
+                                <span class="badge badge-activa">{{ a.minutos_transcurridos }} min</span>
+                            </td>
+                            <td>
+                                <button class="btn btn-success btn-sm"
+                                    data-url="{{ url_for('atender_alerta', alerta_id=a.alerta_id) }}"
+                                    data-nombre="{{ a.nombre_estudiante }}"
+                                    onclick="abrirModalAtender(this.dataset.url, this.dataset.nombre)">
+                                    Atender
+                                </button>
+                                <button class="btn btn-warning btn-sm"
+                                    data-url="{{ url_for('atender_alerta', alerta_id=a.alerta_id, falsa=1) }}"
+                                    data-nombre="{{ a.nombre_estudiante }}"
+                                    onclick="abrirModalFalsa(this.dataset.url, this.dataset.nombre)">
+                                    Falsa
+                                </button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="text-center text-muted" style="padding: 3rem;">
+                    No hay alertas activas en este momento.<br>
+                    El sistema esta monitoreando.
+                </p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Marcar como Atendida -->
+<div id="modalAtender" class="modal-overlay" style="display:none;">
+    <div class="modal-box">
+        <div class="modal-icono success">&#10003;</div>
+        <div class="modal-titulo">¿Marcar como atendida?</div>
+        <div class="modal-desc">
+            La alerta de <strong id="nombreAtender"></strong> será marcada como atendida
+            y removida del panel de monitoreo.
+        </div>
+        <div class="modal-acciones">
+            <button class="modal-btn-cancelar" onclick="cerrarModal('modalAtender')">Cancelar</button>
+            <button class="modal-btn-confirmar-success" onclick="confirmarAccion('modalAtender')">Sí, atendida</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Marcar como Falsa Alarma -->
+<div id="modalFalsa" class="modal-overlay" style="display:none;">
+    <div class="modal-box">
+        <div class="modal-icono warning">&#9888;</div>
+        <div class="modal-titulo">¿Marcar como falsa alarma?</div>
+        <div class="modal-desc">
+            La alerta de <strong id="nombreFalsa"></strong> será registrada
+            como falsa alarma en el historial del sistema.
+        </div>
+        <div class="modal-acciones">
+            <button class="modal-btn-cancelar" onclick="cerrarModal('modalFalsa')">Cancelar</button>
+            <button class="modal-btn-confirmar-warning" onclick="confirmarAccion('modalFalsa')">Sí, falsa alarma</button>
+        </div>
+    </div>
+</div>
+
+<!-- Sonido de alerta -->
+<audio id="audioAlerta" preload="auto">
+    <source src="https://www.soundjay.com/buttons/sounds/button-3.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+let urlPendiente = '';
+
+function abrirModalAtender(url, nombre) {
+    urlPendiente = url;
+    document.getElementById('nombreAtender').innerText = nombre;
+    document.getElementById('modalAtender').style.display = 'flex';
+}
+
+function abrirModalFalsa(url, nombre) {
+    urlPendiente = url;
+    document.getElementById('nombreFalsa').innerText = nombre;
+    document.getElementById('modalFalsa').style.display = 'flex';
+}
+
+function cerrarModal(id) {
+    document.getElementById(id).style.display = 'none';
+    urlPendiente = '';
+}
+
+function confirmarAccion(idModal) {
+    const url = urlPendiente;
+    cerrarModal(idModal);
+    if (url) window.location.href = url;
+}
+
+// ============================================================
+// PANEL DE MONITOREO - US 13
+// ============================================================
+
+let mapaMon, marcadoresAlertas = [];
+let ultimoCount = {{ alertas|length }};
+
+function iniciarMapa() {
+    mapaMon = L.map('mapaMonitoreo').setView([-17.7833, -63.1821], 15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(mapaMon);
+
+    cargarAlertasEnMapa();
+}
+
+async function cargarAlertasEnMapa() {
+    try {
+        const respuesta = await fetch('/api/alertas-activas');
+        const data = await respuesta.json();
+
+        marcadoresAlertas.forEach(m => mapaMon.removeLayer(m));
+        marcadoresAlertas = [];
+
+        data.alertas.forEach(a => {
+            const icono = L.divIcon({
+                className: 'marcador-alerta',
+                html: '<div style="background:#dc3545; border:3px solid white; width:30px; height:30px; border-radius:50%; box-shadow:0 0 20px rgba(220,53,69,0.8); animation: pulse 1s infinite;">!</div>',
+                iconSize: [30, 30]
+            });
+            const marker = L.marker([a.latitud, a.longitud], {icon: icono})
+                .addTo(mapaMon)
+                .bindPopup(`<b>${a.nombre_estudiante}</b><br>${a.correo_estudiante}<br>Hace ${a.minutos_transcurridos} min`);
+            marcadoresAlertas.push(marker);
+        });
+
+        if (data.total > ultimoCount) {
+            sonarAlerta();
+            setTimeout(() => location.reload(), 1500);
+        }
+        ultimoCount = data.total;
+        document.getElementById('contadorActivas').innerText = data.total;
+    } catch (e) {
+        console.error('Error:', e);
+    }
+}
+
+function sonarAlerta() {
+    try {
+        document.getElementById('audioAlerta').play();
+    } catch(e) {}
+    document.body.style.background = '#ffcccc';
+    setTimeout(() => { document.body.style.background = ''; }, 500);
+}
+
+setInterval(cargarAlertasEnMapa, 5000);
+window.addEventListener('load', iniciarMapa);
+</script>
+{% endblock %}

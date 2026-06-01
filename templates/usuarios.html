@@ -1,0 +1,58 @@
+{% extends 'layout.html' %}
+
+{% block titulo %}Usuarios - SafeCampus UCB{% endblock %}
+
+{% block contenido %}
+<div class="container">
+    <div class="card">
+        <h1>Usuarios registrados</h1>
+        <p class="text-muted">Total: {{ usuarios|length }} usuarios</p>
+
+        <table class="tabla mt-2">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Correo</th>
+                    <th>Nombre</th>
+                    <th>Telefono</th>
+                    <th>Rol</th>
+                    <th>Verificado</th>
+                    <th>Estado</th>
+                    {% if session.rol in ['monitor', 'admin'] %}
+                    <th>Acciones</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+            {% for u in usuarios %}
+                <tr>
+                    <td>{{ u.id }}</td>
+                    <td>{{ u.correo }}</td>
+                    <td>{{ u.nombre }}</td>
+                    <td>{{ u.telefono or '-' }}</td>
+                    <td>
+                        {% if u.rol == 'monitor' %}<span class="badge" style="background:#0066cc;color:white;">Monitor</span>
+                        {% elif u.rol == 'admin' %}<span class="badge" style="background:#003366;color:white;">Admin</span>
+                        {% else %}Estudiante{% endif %}
+                    </td>
+                    <td>{% if u.is_verified %}<span style="color:#28a745;">SI</span>{% else %}<span style="color:#dc3545;">NO</span>{% endif %}</td>
+                    <td>
+                        {% if u.estado == 'activo' %}<span class="badge badge-atendida">Activo</span>
+                        {% else %}<span class="badge badge-falsa">Inactivo</span>{% endif %}
+                    </td>
+                    {% if session.rol in ['monitor', 'admin'] %}
+                    <td>
+                        {% if u.estado == 'activo' and u.id != session.usuario_id %}
+                        <a href="{{ url_for('usuarios_desactivar', user_id=u.id) }}"
+                           class="btn btn-danger btn-sm"
+                           onclick="return confirm('Desactivar usuario?')">Desactivar</a>
+                        {% endif %}
+                    </td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
